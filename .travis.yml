@@ -7,9 +7,6 @@ before_install:
   - docker-compose up -d
   - sleep 10
 
-before_script:
-  - sleep 20
-
 script:
   - bundle exec rspec
   - bundle exec rubocop

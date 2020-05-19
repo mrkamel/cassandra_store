@@ -123,7 +123,7 @@ RSpec.describe CassandraRecord::Base do
     it "does not persist the record when validation fails" do
       test_log = TestLog.new
 
-      expect { test_log.save }.not_to change { TestLog.count }
+      expect { test_log.save }.not_to(change { TestLog.count })
     end
 
     it "adds the errors when validation fails" do
@@ -165,13 +165,29 @@ RSpec.describe CassandraRecord::Base do
     it "does not persist the record if validation fails" do
       test_log = TestLog.new
 
-      expect { test_log.save! rescue nil }.not_to change { TestLog.count }
+      block = proc do
+        begin
+          test_log.save!
+        rescue StandardError
+          nil
+        end
+      end
+
+      expect(&block).not_to(change { TestLog.count })
     end
 
     it "returns true when the record can be persisted" do
       test_log = TestLog.new(timestamp: Time.parse("2016-11-01 12:00:00"))
 
-      expect { test_log.save! rescue nil }.to change { TestLog.count }.by(1)
+      block = proc do
+        begin
+          test_log.save!
+        rescue StandardError
+          nil
+        end
+      end
+
+      expect(&block).to(change { TestLog.count }.by(1))
     end
 
     it "persists the record" do

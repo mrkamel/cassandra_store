@@ -50,7 +50,7 @@ Style/SymbolArray:
 Layout/RescueEnsureAlignment:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 
 Metrics/MethodLength:

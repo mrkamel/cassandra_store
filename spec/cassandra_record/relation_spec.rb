@@ -42,7 +42,7 @@ RSpec.describe CassandraRecord::Relation do
     it "is chainable" do
       post1 = Post.create!(user: "user", domain: "domain1", message: "message1")
       post2 = Post.create!(user: "user", domain: "domain1", message: "message2")
-      post3 = Post.create!(user: "user", domain: "domain2", message: "message1")
+      _post3 = Post.create!(user: "user", domain: "domain2", message: "message1")
 
       posts = Post.where(user: "user").where(domain: "domain1").to_a
 
@@ -52,7 +52,7 @@ RSpec.describe CassandraRecord::Relation do
     it "allows to pass multiple hash arguments" do
       post1 = Post.create!(user: "user", domain: "domain1", message: "message1")
       post2 = Post.create!(user: "user", domain: "domain1", message: "message2")
-      post3 = Post.create!(user: "user", domain: "domain2", message: "message1")
+      _post3 = Post.create!(user: "user", domain: "domain2", message: "message1")
 
       posts = Post.where(user: "user", domain: "domain1").to_a
 
@@ -62,7 +62,7 @@ RSpec.describe CassandraRecord::Relation do
     it "allows to pass an array as constraint" do
       post1 = Post.create!(user: "user", domain: "domain1")
       post2 = Post.create!(user: "user", domain: "domain2")
-      post3 = Post.create!(user: "user", domain: "domain3")
+      _post3 = Post.create!(user: "user", domain: "domain3")
 
       posts = Post.where(user: "user").where(domain: ["domain1", "domain2"]).to_a
 
@@ -72,7 +72,7 @@ RSpec.describe CassandraRecord::Relation do
     it "allows to pass a range as constraint" do
       post1 = Post.create!(user: "user", domain: "domain1")
       post2 = Post.create!(user: "user", domain: "domain2")
-      post3 = Post.create!(user: "user", domain: "domain3")
+      _post3 = Post.create!(user: "user", domain: "domain3")
 
       expect(Post.where(user: "user").where(domain: "domain1".."domain2").to_a.to_set).to eq([post1, post2].to_set)
     end
@@ -80,7 +80,7 @@ RSpec.describe CassandraRecord::Relation do
     it "allows to pass an arbitrary cql string" do
       post1 = Post.create!(user: "user", domain: "domain1", message: "message1")
       post2 = Post.create!(user: "user", domain: "domain1", message: "message2")
-      post3 = Post.create!(user: "user", domain: "domain2", message: "message1")
+      _post3 = Post.create!(user: "user", domain: "domain2", message: "message1")
 
       expect(Post.where_cql("user = 'user'").where_cql("domain = :domain", domain: "domain1").to_a.to_set).to eq([post1, post2].to_set)
     end
@@ -188,8 +188,8 @@ RSpec.describe CassandraRecord::Relation do
 
   describe "#delete_all" do
     it "deletes the specified records" do
-      post1 = Post.create!(user: "user", domain: "domain1", timestamp: Time.now)
-      post2 = Post.create!(user: "user", domain: "domain1", timestamp: Time.now)
+      _post1 = Post.create!(user: "user", domain: "domain1", timestamp: Time.now)
+      _post2 = Post.create!(user: "user", domain: "domain1", timestamp: Time.now)
       post3 = Post.create!(user: "user", domain: "domain2", timestamp: Time.now)
 
       Post.where(user: "user", domain: "domain1").delete_all
@@ -200,8 +200,8 @@ RSpec.describe CassandraRecord::Relation do
 
   describe "#delete_in_batches" do
     it "deletes the records in batches" do
-      post1 = Post.create!(user: "user", domain: "domain1", timestamp: Time.now)
-      post2 = Post.create!(user: "user", domain: "domain1", timestamp: Time.now)
+      _post1 = Post.create!(user: "user", domain: "domain1", timestamp: Time.now)
+      _post2 = Post.create!(user: "user", domain: "domain1", timestamp: Time.now)
       post3 = Post.create!(user: "user", domain: "domain2", timestamp: Time.now)
 
       Post.where(user: "user", domain: "domain1").delete_in_batches
