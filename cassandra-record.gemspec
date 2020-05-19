@@ -21,6 +21,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
+  spec.add_development_dependency "rubocop"
 
   spec.add_dependency "activemodel", ">= 3.0"
   spec.add_dependency "activesupport", ">= 3.0"

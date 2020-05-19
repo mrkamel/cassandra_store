@@ -3,13 +3,9 @@ rvm:
   - 2.6.3
   - 2.7.1
 
-jdk:
-  - openjdk8
-
-install:
-  - travis_retry bundle install
-  - curl -s http://archive.apache.org/dist/cassandra/3.9/apache-cassandra-3.9-bin.tar.gz | tar xz -C /tmp
-  - MAX_HEAP_SIZE=128M HEAP_NEWSIZE=32M /tmp/apache-cassandra-3.9/bin/cassandra
+before_install:
+  - docker-compose up -d
+  - sleep 10
 
 before_script:
   - sleep 20
