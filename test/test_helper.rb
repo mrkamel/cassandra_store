@@ -1,4 +1,3 @@
-
 require "minitest"
 require "minitest/autorun"
 require "cassandra_record"
@@ -9,7 +8,7 @@ connection.execute "CREATE KEYSPACE cassandra_record WITH REPLICATION = { 'class
 
 CassandraRecord::Base.connection_pool = ConnectionPool.new(size: 1, timeout: 5) { Cassandra.cluster.connect("cassandra_record") }
 
-CassandraRecord::Base.execute <<EOF
+CassandraRecord::Base.execute <<CQL
   CREATE TABLE posts(
     user TEXT,
     domain TEXT,
@@ -18,7 +17,7 @@ CassandraRecord::Base.execute <<EOF
     timestamp TIMESTAMP,
     PRIMARY KEY((user, domain), id)
   )
-EOF
+CQL
 
 class Post < CassandraRecord::Base
   column :user, :text, partition_key: true
@@ -33,7 +32,7 @@ class Post < CassandraRecord::Base
   end
 end
 
-CassandraRecord::Base.execute <<EOF
+CassandraRecord::Base.execute <<CQL
   CREATE TABLE test_logs(
     date DATE,
     bucket INT,
@@ -43,7 +42,7 @@ CassandraRecord::Base.execute <<EOF
     timestamp TIMESTAMP,
     PRIMARY KEY((date, bucket), id)
   )
-EOF
+CQL
 
 class TestLog < CassandraRecord::Base
   column :date, :date, partition_key: true
@@ -72,8 +71,8 @@ class TestLogWithContext < TestLog
     "test_logs"
   end
 
-  validates_presence_of :username, :on => :create
-  validates_presence_of :query, :on => :update
+  validates_presence_of :username, on: :create
+  validates_presence_of :query, on: :update
 end
 
 class CassandraRecord::TestCase < MiniTest::Test
@@ -83,7 +82,7 @@ class CassandraRecord::TestCase < MiniTest::Test
   end
 
   def assert_difference(expressions, difference = 1, &block)
-    callables = Array(expressions).map { |e| lambda { eval(e, block.binding) } }
+    callables = Array(expressions).map { |e| -> { eval(e, block.binding) } }
 
     before = callables.map(&:call)
 
@@ -108,4 +107,3 @@ class CassandraRecord::TestCase < MiniTest::Test
     assert object.present?, "should be present"
   end
 end
-

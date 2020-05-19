@@ -1,9 +1,7 @@
-
 source "https://rubygems.org"
 
 gemspec
 
+gem "activesupport"
 gem "cassandra-driver"
-gem "activesupport", " ~> 4"
 gem "hooks"
-

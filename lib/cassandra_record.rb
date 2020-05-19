@@ -1,4 +1,3 @@
-
 require "cassandra"
 require "connection_pool"
 require "active_model"
@@ -16,4 +15,3 @@ module CassandraRecord
   class RecordNotPersisted < StandardError; end
   class UnknownType < StandardError; end
 end
-

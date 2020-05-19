@@ -1,4 +1,3 @@
-
 class CassandraRecord::Relation
   attr_accessor :target, :where_values, :where_cql_values, :order_values, :limit_value, :distinct_value, :select_values
 
@@ -87,11 +86,11 @@ class CassandraRecord::Relation
       records = []
 
       result.each do |row|
-        if select_values.present?
-          records << row
-        else
-          records << load_record(row)
-        end
+        records << if select_values.present?
+                     row
+                   else
+                     load_record(row)
+                   end
       end
 
       yield(records) unless records.empty?
@@ -165,11 +164,11 @@ class CassandraRecord::Relation
 
     Array(where_values).each do |hash|
       hash.each do |column, value|
-        if value.is_a?(Array) || value.is_a?(Range)
-          constraints << "#{target.quote_column_name column} IN (#{value.to_a.map { |v| target.quote_value v }.join(", ")})"
-        else
-          constraints << "#{target.quote_column_name column} = #{target.quote_value value}"
-        end
+        constraints << if value.is_a?(Array) || value.is_a?(Range)
+                         "#{target.quote_column_name column} IN (#{value.to_a.map { |v| target.quote_value v }.join(", ")})"
+                       else
+                         "#{target.quote_column_name column} = #{target.quote_value value}"
+                       end
       end
     end
 
@@ -179,11 +178,10 @@ class CassandraRecord::Relation
   end
 
   def order_clause
-    "#{order_values.presence ? "ORDER BY #{order_values.map { |column, value| "#{target.quote_column_name column} #{value}" }.join(", ")}" : ""}"
+    (order_values.presence ? "ORDER BY #{order_values.map { |column, value| "#{target.quote_column_name column} #{value}" }.join(", ")}" : "").to_s
   end
 
   def limit_clause
-    "#{limit_value ? "LIMIT #{limit_value.to_i}" : ""}"
+    (limit_value ? "LIMIT #{limit_value.to_i}" : "").to_s
   end
 end
-

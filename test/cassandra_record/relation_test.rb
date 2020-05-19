@@ -1,5 +1,4 @@
-
-require File.expand_path("../../test_helper", __FILE__)
+require File.expand_path("../test_helper", __dir__)
 
 class CassandraRecord::RelationTest < CassandraRecord::TestCase
   def test_all
@@ -67,7 +66,7 @@ class CassandraRecord::RelationTest < CassandraRecord::TestCase
     post2 = Post.create!(user: "user", domain: "domain2")
     post3 = Post.create!(user: "user", domain: "domain3")
 
-    posts = Post.where(user: "user").where(domain: "domain1" .. "domain2").to_a
+    posts = Post.where(user: "user").where(domain: "domain1".."domain2").to_a
 
     assert_includes posts, post1
     assert_includes posts, post2
@@ -122,7 +121,7 @@ class CassandraRecord::RelationTest < CassandraRecord::TestCase
     Post.create! user: "user2", domain: "domain1", timestamp: Time.now
 
     assert_equal [{ "user" => "user1", "domain" => "domain1" }, { "user" => "user1", "domain" => "domain2" }, { "user" => "user2", "domain" => "domain1" }],
-      Post.select(:user, :domain).distinct.find_each.to_a
+                 Post.select(:user, :domain).distinct.find_each.to_a
   end
 
   def test_select
@@ -145,7 +144,7 @@ class CassandraRecord::RelationTest < CassandraRecord::TestCase
     Post.create! user: "user", domain: "domain", message: "message2", timestamp: Time.now + 1.day
     Post.create! user: "user", domain: "domain", message: "message3", timestamp: Time.now + 2.days
 
-    assert_equal [["message1", "message2"], ["message3"]], Post.find_in_batches(batch_size: 2).map { |batch| batch.map(&:message) }
+    assert_equal [["message1", "message2"], ["message3"]], Post.find_in_batches(batch_size: 2).map(&:message)
   end
 
   def test_count
@@ -192,4 +191,3 @@ class CassandraRecord::RelationTest < CassandraRecord::TestCase
     assert_equal ["message1", "message2"].to_set, Post.where(user: "user", domain: "domain1").to_a.map(&:message).to_set
   end
 end
-

@@ -1,8 +1,5 @@
-
-require File.expand_path("../../test_helper", __FILE__)
+require File.expand_path("../test_helper", __dir__)
 
 class CassandraRecord::MigrationTest < CassandraRecord::TestCase
-  def test_migrate
-  end
+  def test_migrate; end
 end
-

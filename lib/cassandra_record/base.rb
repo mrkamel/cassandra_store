@@ -1,4 +1,3 @@
-
 class CassandraRecord::Base
   include ActiveModel::Dirty
   include ActiveModel::Validations
@@ -8,12 +7,16 @@ class CassandraRecord::Base
 
   class_attribute :logger
   self.logger = Logger.new(STDOUT)
-  self.logger.level = Logger::INFO
+  logger.level = Logger::INFO
 
   class_attribute :columns
   self.columns = {}
 
-  define_hooks :before_validation, :after_validation, :before_create, :after_create, :before_update, :after_update, :before_save, :after_save, :before_destroy, :after_destroy
+  define_hooks :before_validation, :after_validation
+  define_hooks :before_create, :after_create
+  define_hooks :before_update, :after_update
+  define_hooks :before_save, :after_save
+  define_hooks :before_destroy, :after_destroy
 
   def initialize(attributes = {})
     @persisted = false
@@ -73,7 +76,7 @@ class CassandraRecord::Base
 
     _save
   end
-    
+
   def save
     return false unless valid?
 
@@ -97,7 +100,7 @@ class CassandraRecord::Base
   end
 
   def persisted?
-    !! @persisted
+    !!@persisted
   end
 
   def persisted!
@@ -109,7 +112,7 @@ class CassandraRecord::Base
   end
 
   def destroyed?
-    !! @destroyed
+    !!@destroyed
   end
 
   def destroyed!
@@ -157,7 +160,7 @@ class CassandraRecord::Base
   def self.key_columns
     partition_key_columns.merge(clustering_key_columns)
   end
-    
+
   def self.partition_key_columns
     columns.select { |_, options| options[:partition_key] }
   end
@@ -196,35 +199,38 @@ class CassandraRecord::Base
     return nil if value.nil?
 
     case type
-      when :text
-        value.to_s
-      when :int, :bigint
-        Integer(value)
-      when :boolean
-        return true if [1, "1", "true", true].include?(value)
-        return false if [0, "0", "false", false].include?(value)
-        raise ArgumentError, "Can't cast '#{value}' to #{type}"
-      when :date
-        if value.is_a?(String) then Date.parse(value)
-        elsif value.respond_to?(:to_date) then value.to_date
-        else raise(ArgumentError, "Can't cast '#{value}' to #{type}")
-        end
-      when :timestamp
-        if value.is_a?(String) then Time.parse(value)
-        elsif value.respond_to?(:to_time) then value.to_time
-        elsif value.is_a?(Numeric) then Time.at(value)
-        else raise(ArgumentError, "Can't cast '#{value}' to #{type}")
-        end.utc.round(3)
-      when :timeuuid
-        return value if value.is_a?(Cassandra::TimeUuid)
-        return Cassandra::TimeUuid.new(value) if value.is_a?(String) || value.is_a?(Integer)
-        raise ArgumentError, "Can't cast '#{value}' to #{type}"
-      when :uuid
-        return value if value.is_a?(Cassandra::Uuid)
-        return Cassandra::Uuid.new(value) if value.is_a?(String) || value.is_a?(Integer)
-        raise ArgumentError, "Can't cast '#{value}' to #{type}"
-      else
-        raise CassandraRecord::UnknownType, "Unknown type #{type}"
+    when :text
+      value.to_s
+    when :int, :bigint
+      Integer(value)
+    when :boolean
+      return true if [1, "1", "true", true].include?(value)
+      return false if [0, "0", "false", false].include?(value)
+
+      raise ArgumentError, "Can't cast '#{value}' to #{type}"
+    when :date
+      if value.is_a?(String) then Date.parse(value)
+      elsif value.respond_to?(:to_date) then value.to_date
+      else raise(ArgumentError, "Can't cast '#{value}' to #{type}")
+      end
+    when :timestamp
+      if value.is_a?(String) then Time.parse(value)
+      elsif value.respond_to?(:to_time) then value.to_time
+      elsif value.is_a?(Numeric) then Time.at(value)
+      else raise(ArgumentError, "Can't cast '#{value}' to #{type}")
+      end.utc.round(3)
+    when :timeuuid
+      return value if value.is_a?(Cassandra::TimeUuid)
+      return Cassandra::TimeUuid.new(value) if value.is_a?(String) || value.is_a?(Integer)
+
+      raise ArgumentError, "Can't cast '#{value}' to #{type}"
+    when :uuid
+      return value if value.is_a?(Cassandra::Uuid)
+      return Cassandra::Uuid.new(value) if value.is_a?(String) || value.is_a?(Integer)
+
+      raise ArgumentError, "Can't cast '#{value}' to #{type}"
+    else
+      raise CassandraRecord::UnknownType, "Unknown type #{type}"
     end
   end
 
@@ -238,35 +244,25 @@ class CassandraRecord::Base
 
   def self.quote_value(value)
     case value
-      when Time, ActiveSupport::TimeWithZone
-        (value.to_r * 1000).round.to_s
-      when DateTime
-        quote_value(value.utc.to_time)
-      when Date
-        quote_value(value.strftime("%Y-%m-%d"))
-      when Numeric, true, false, Cassandra::Uuid
-        value.to_s
-      else
-        quote_string(value.to_s)
+    when Time, ActiveSupport::TimeWithZone
+      (value.to_r * 1000).round.to_s
+    when DateTime
+      quote_value(value.utc.to_time)
+    when Date
+      quote_value(value.strftime("%Y-%m-%d"))
+    when Numeric, true, false, Cassandra::Uuid
+      value.to_s
+    else
+      quote_string(value.to_s)
     end
   end
 
   def self.quote_string(string)
     "'#{string.gsub("'", "''")}'"
-  end 
+  end
 
   def self.truncate_table
     execute "TRUNCATE TABLE #{quote_table_name table_name}"
-  end
-
-  def self.statement(string, args = {})
-    res = string.dup
-
-    args.each do |key, value|
-      res.gsub!(":#{key}", quote_value(value))
-    end
-
-    res
   end
 
   def self.execute(statement, options = {})
@@ -306,20 +302,16 @@ class CassandraRecord::Base
   private
 
   def _save
+    run_hook :before_save
+
     if persisted?
-      run_hook :before_save
-
       update_record
-
-      run_hook :after_save
     else
-      run_hook :before_save
-
       create_record
       persisted!
-
-      run_hook :after_save
     end
+
+    run_hook :after_save
 
     changes_applied
 
@@ -386,4 +378,3 @@ class CassandraRecord::Base
     @timeuuid_generator.at(time)
   end
 end
-

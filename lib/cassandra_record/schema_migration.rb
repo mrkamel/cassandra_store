@@ -1,4 +1,3 @@
-
 class CassandraRecord::SchemaMigration < CassandraRecord::Base
   def self.table_name
     "schema_migrations"
@@ -10,4 +9,3 @@ class CassandraRecord::SchemaMigration < CassandraRecord::Base
 
   column :version, :text, partition_key: true
 end
-

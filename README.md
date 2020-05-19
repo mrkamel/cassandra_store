@@ -1,5 +1,5 @@
 
-[![Build Status](https://secure.travis-ci.org/mrkamel/cassandra_record.png?branch=master)](http://travis-ci.org/mrkamel/cassandra_record)
+[![Build Status](https://secure.travis-ci.org/mrkamel/cassandra-record.png?branch=master)](http://travis-ci.org/mrkamel/cassandra-record)
 
 # CassandraRecord
 
@@ -13,7 +13,7 @@ complexity of the code base.
 
 Add this line to your application's Gemfile:
 
-    gem 'cassandra_record'
+    gem 'cassandra-record'
 
 And then execute:
 
@@ -21,7 +21,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install cassandra_record
+    $ gem install cassandra-record
 
 ## TODO
 

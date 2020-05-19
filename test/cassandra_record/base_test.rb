@@ -1,5 +1,4 @@
-
-require File.expand_path("../../test_helper", __FILE__)
+require File.expand_path("../test_helper", __dir__)
 
 class TestRecord < CassandraRecord::Base
   column :text, :text
@@ -75,15 +74,15 @@ class CassandraRecord::BaseTest < CassandraRecord::TestCase
     assert_equal Cassandra::TimeUuid.new("1ce29e82-b2ea-11e6-88fa-2971245f69e1"), test_record.timeuuid
     test_record.timeuuid = "1ce29e82-b2ea-11e6-88fa-2971245f69e2"
     assert_equal Cassandra::TimeUuid.new("1ce29e82-b2ea-11e6-88fa-2971245f69e2"), test_record.timeuuid
-    test_record.timeuuid = 38395057947756324226486198980982041059
-    assert_equal Cassandra::TimeUuid.new(38395057947756324226486198980982041059), test_record.timeuuid
+    test_record.timeuuid = 38_395_057_947_756_324_226_486_198_980_982_041_059
+    assert_equal Cassandra::TimeUuid.new(38_395_057_947_756_324_226_486_198_980_982_041_059), test_record.timeuuid
 
     test_record.uuid = Cassandra::Uuid.new("b9af7b9b-9317-43b3-922e-fe303f5942c1")
     assert_equal Cassandra::Uuid.new("b9af7b9b-9317-43b3-922e-fe303f5942c1"), test_record.uuid
     test_record.uuid = "b9af7b9b-9317-43b3-922e-fe303f5942c2"
     assert_equal Cassandra::Uuid.new("b9af7b9b-9317-43b3-922e-fe303f5942c2"), test_record.uuid
-    test_record.uuid = 13466612472233423808722080080896418394
-    assert_equal Cassandra::Uuid.new(13466612472233423808722080080896418394), test_record.uuid
+    test_record.uuid = 13_466_612_472_233_423_808_722_080_080_896_418_394
+    assert_equal Cassandra::Uuid.new(13_466_612_472_233_423_808_722_080_080_896_418_394), test_record.uuid
   end
 
   def test_save
@@ -268,7 +267,10 @@ class CassandraRecord::BaseTest < CassandraRecord::TestCase
   end
 
   def test_statement
-    assert_equal "UPDATE table_table SET column_name = 1 WHERE key_name = 'key name'", CassandraRecord::Base.statement("UPDATE table_name SET column_name = :value WHERE key_name = :key_name", key_name: "key name", value: 1)
+    assert_equal "UPDATE table_name SET column_name = 1 WHERE key_name = 'key name'", CassandraRecord::Base.statement("UPDATE table_name SET column_name = :value WHERE key_name = :key_name", key_name: "key name", value: 1)
+
+    assert_equal "SELECT * FROM table WHERE date = '2016-12-06' AND id = 1 AND message = 'some''value'",
+                 TestLog.statement("SELECT * FROM table WHERE date = :date AND id = :id AND message = :message", date: Date.parse("2016-12-06"), id: 1, message: "some'value")
   end
 
   def test_execute
@@ -297,11 +299,6 @@ class CassandraRecord::BaseTest < CassandraRecord::TestCase
     end
   end
 
-  def test_statement
-    assert_equal "SELECT * FROM table WHERE date = '2016-12-06' AND id = 1 AND message = 'some''value'",
-      TestLog.statement("SELECT * FROM table WHERE date = :date AND id = :id AND message = :message", date: Date.parse("2016-12-06"), id: 1, message: "some'value")
-  end
-
   def test_callbacks
     temp_log = Class.new(TestLog) do
       def self.table_name
@@ -319,7 +316,7 @@ class CassandraRecord::BaseTest < CassandraRecord::TestCase
       before_validation { called_callbacks << :before_validation }
       after_validation { called_callbacks << :after_validation }
       before_save { called_callbacks << :before_save }
-      after_save { called_callbacks << :after_save}
+      after_save { called_callbacks << :after_save }
       before_create { called_callbacks << :before_create }
       after_create { called_callbacks << :after_create }
       before_update { called_callbacks << :before_update }
@@ -372,15 +369,12 @@ class CassandraRecord::BaseTest < CassandraRecord::TestCase
   end
 
   def test_key_columns
-    assert_equal({ date: { type: :date, partition_key: true, clustering_key: false }, bucket: { type: :int, partition_key: true, clustering_key: false }, id: { type: :timeuuid, partition_key: false, clustering_key: true }}, TestLog.key_columns)
+    assert_equal({ date: { type: :date, partition_key: true, clustering_key: false }, bucket: { type: :int, partition_key: true, clustering_key: false }, id: { type: :timeuuid, partition_key: false, clustering_key: true } }, TestLog.key_columns)
+    assert_equal({ id: { type: :timeuuid, partition_key: false, clustering_key: true } }, TestLog.clustering_key_columns)
   end
 
   def test_partition_key_columns
-    assert_equal({ date: { type: :date, partition_key: true, clustering_key: false }, bucket: { type: :int, partition_key: true, clustering_key: false }}, TestLog.partition_key_columns)
-  end
-
-  def test_key_columns
-    assert_equal({ id: { type: :timeuuid, partition_key: false, clustering_key: true }}, TestLog.clustering_key_columns)
+    assert_equal({ date: { type: :date, partition_key: true, clustering_key: false }, bucket: { type: :int, partition_key: true, clustering_key: false } }, TestLog.partition_key_columns)
   end
 
   def test_key_values
@@ -417,4 +411,3 @@ class CassandraRecord::BaseTest < CassandraRecord::TestCase
     refute_equal record1, record2
   end
 end
-
