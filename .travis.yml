@@ -1,9 +1,7 @@
-
 rvm:
-  - 2.3.8
-  - 2.4.9
   - 2.5.7
   - 2.6.3
+  - 2.7.1
 
 jdk:
   - openjdk8
@@ -17,7 +15,7 @@ before_script:
   - sleep 20
 
 script:
-  - bundle exec rake test
+  - bundle exec rspec
+  - bundle exec rubocop
 
 sudo: false
-
