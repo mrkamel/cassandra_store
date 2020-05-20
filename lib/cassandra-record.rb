@@ -1,1 +1,1 @@
-require "cassandra-record"
+require "cassandra_record"
