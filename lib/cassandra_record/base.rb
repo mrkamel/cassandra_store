@@ -368,12 +368,14 @@ class CassandraRecord::Base
     "WHERE #{self.class.key_columns.map { |column, _| "#{self.class.quote_column_name column} = #{self.class.quote_value read_raw_attribute(column)}" }.join(" AND ")}"
   end
 
+  protected
+
   def generate_uuid
     @uuid_generator ||= Cassandra::Uuid::Generator.new
     @uuid_generator.uuid
   end
 
-  def generate_timeuuid(time)
+  def generate_timeuuid(time = Time.now)
     @timeuuid_generator ||= Cassandra::TimeUuid::Generator.new
     @timeuuid_generator.at(time)
   end

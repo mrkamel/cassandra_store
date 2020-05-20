@@ -581,4 +581,24 @@ RSpec.describe CassandraRecord::Base do
       expect(record1).not_to eq(record2)
     end
   end
+
+  describe ".generate_uuid" do
+    it "generates a uuid" do
+      expect(TestLog.new.send(:generate_uuid)).to be_instance_of(Cassandra::Uuid)
+      expect(TestLog.new.send(:generate_uuid).to_s).to match(/\A[0-9a-f]+-[0-9a-f]+-[0-9a-f]+-[0-9a-f]+-[0-9a-f]+\z/)
+    end
+  end
+
+  describe ".generate_timeuuid" do
+    it "generates a timeuuid" do
+      expect(TestLog.new.send(:generate_timeuuid)).to be_instance_of(Cassandra::TimeUuid)
+      expect(TestLog.new.send(:generate_timeuuid).to_s).to match(/\A[0-9a-f]+-[0-9a-f]+-[0-9a-f]+-[0-9a-f]+-[0-9a-f]+\z/)
+    end
+
+    it "respects a passed a timestamp" do
+      timestamp = Time.parse("2020-05-20 12:00:00")
+
+      expect(TestLog.new.send(:generate_timeuuid, timestamp).to_time.utc.round).to eq(timestamp.utc.round)
+    end
+  end
 end

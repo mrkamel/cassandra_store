@@ -22,11 +22,226 @@ Or install it yourself as:
 
     $ gem install cassandra-record
 
-## TODO
+# Usage
 
-* YARD
-* Rake task to migrate up/down
-* README
+## Connecting
+
+First and foremost, you need to connect to your cassandra cluster like so:
+
+```ruby
+CassandraRecord::Base.connection_pool = ConnectionPool.new(size: 5, timeout: 5) do
+  Cassandra.cluster(consistency: :quorum, hosts: ["127.0.0.1"]).connect("my_keyspace")
+end
+```
+
+When using rails, you want to do that in an initializer. Please note, we
+assume, you already have a keyspace. CassandraRecord can not yet create
+keyspaces for you.
+
+## Migrations
+
+If you are on rails and you don't have any tables yet, you can add migrations
+now. There is no generator yet, so you have to create them manually:
+
+```
+# cassandra/migrate/1589896040_create_posts.rb
+
+class CreatePosts < CassandraRecord::Migration
+  def up
+    execute <<-EOF
+      CREATE TABLE posts (
+        user TEXT,
+        domain TEXT,
+        id TIMEUUID,
+        message TEXT,
+        PRIMARY KEY ((user, domain), id)
+      )
+    EOF
+  end
+
+  def down
+    execute 'DROP TABLE posts'
+  end
+end
+```
+
+Afterwards, simply run `rake cassandra:migrate`.
+
+## Models
+
+Creating models couldn't be easier:
+
+```ruby
+class Post < CassandraRecord::Base
+  column :user, :text, partition_key: true
+  column :domain, :text, partition_key: true
+  column :id, :timeuuid, clustering_key: true
+  column :message, :text
+
+  validates_presence_of :user, :domain, :message
+
+  before_create do
+    self.id ||= generate_timeuuid
+  end
+end
+```
+
+Let's check this out in detail:
+
+```ruby
+  column :user, :text, partition_key: true
+  column :domain, :text, partition_key: true
+```
+
+tells CassandraRecord that your partition key is comprised of the `user` column
+as well as the `domain` column. For more information regarding partition keys
+and the data model of cassandra, please check out the cassandra docs. Afterwards,
+the clustering/sorting key is specified via:
+
+```ruby
+column :id, :timeuuid, clustering_key: true
+```
+
+The `id` is assigned here:
+
+```ruby
+  self.id ||= generate_timeuuid
+```
+
+Please note, CassandraRecord never auto-assigns any values for you, but you
+have to assign them. You can pass a timestamp to `generate_timeuuid` as well.
+This is desirable when you have timestamp columns as well and you want them
+to match with your timeuuid key.
+
+In addition, you can of course use all kinds of validations, hooks, etc.
+
+## Querying
+
+The interface for dealing with records and querying them is very similar
+to the interface of `ActiveRecord`:
+
+```ruby
+Post.create!(user: "mrkamel", ...)
+Post.create(...)
+Post.new(...).save
+Post.new(...).save!
+Post.first.delete
+Post.first.destroy
+```
+
+CassandraRecord supports comprehensive query methods in a chainable way:
+
+* `all`
+
+```ruby
+  Post.all
+```
+
+* `where`
+
+```ruby
+  Post.where(user: "mrkamel", domain: "example.com")
+```
+
+* `where_cql`
+
+```ruby
+  Post.where_cql("user = :user", user: "mrkamel")
+```
+
+* `limit`
+
+```ruby
+  Post.where(...).limit(10)
+```
+
+* `order`
+
+```ruby
+  Post.where(...).order(id: "asc")
+```
+
+* `distinct`
+
+```ruby
+  Post.select(:user, :domain).distinct
+```
+
+* `select`
+
+```ruby
+  Post.select(:user, :domain)
+```
+
+Please note, when using `select` in the end an array of hashes will be returned
+instead of an array of `Post` objects.
+
+* `count`
+
+```ruby
+  Post.where(...).count
+```
+
+* `first`
+
+```ruby
+  Post.where(...).first
+```
+
+* `find_each`
+
+```ruby
+  Post.where(...).find_each(batch_size: 100) do |post|
+    # ...
+  end
+```
+
+* `find_in_batches`
+
+```ruby
+  Post.where(...).find_in_batches(batch_size: 100) do |batch|
+    # ...
+  end
+```
+
+* `update_all`
+
+```ruby
+  Post.where(...).update_all("message = 'test'")
+  Post.where(...).update_all(message: "test")
+```
+
+* `delete_all`
+
+```ruby
+  Post.where(...).delete_all
+```
+
+Please note, that `delete_in_batches` will run `find_in_batches` iteratively
+and then delete each batch. When dealing with large amounts of records to
+delete you usually want to use `delete_in_batches` instead of `delete_all`, as
+`delete_all` can time out.
+
+* `delete_in_batches`
+
+```ruby
+  Post.where(...).delete_in_batches
+```
+
+Again, please note, that `delete_in_batches` will run `find_in_batches` iteratively
+and then delete each batch. When dealing with large amounts of records to
+delete you usually want to use `delete_in_batches` instead of `delete_all`, as
+`delete_all` can time out.
+
+* `truncate_table`
+
+```ruby
+  Post.truncate_table
+```
+
+Deletes all records from the table. This is much faster than `delete_all` or
+`delete_in_batches`.  However, it is not chainable, such that your only option
+is to remove all records from the table.
 
 ## Semantic Versioning
 
