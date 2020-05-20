@@ -77,6 +77,10 @@ end
 
 RSpec.configure do |config|
   config.before do
+    CassandraRecord::Base.execute <<~CQL
+      DROP TABLE IF EXISTS schema_migrations
+    CQL
+
     TestLog.delete_in_batches
     Post.delete_in_batches
   end

@@ -4,20 +4,18 @@ class CassandraRecord::Migration
   end
 
   def self.migration_class(path, version)
+    require migration_file(path, version)
+
     File.basename(migration_file(path, version), ".rb").gsub(/\A[0-9]+_/, "").camelcase.constantize
   end
 
   def self.up(path, version)
-    require migration_file(path, version)
-
     migration_class(path, version).new.up
 
     CassandraRecord::SchemaMigration.create!(version: version.to_s)
   end
 
   def self.down(path, version)
-    require migration_file(path, version)
-
     migration_class(path, version).new.down
 
     CassandraRecord::SchemaMigration.where(version: version.to_s).delete_all

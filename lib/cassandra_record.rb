@@ -9,6 +9,7 @@ require "cassandra_record/base"
 require "cassandra_record/relation"
 require "cassandra_record/schema_migration"
 require "cassandra_record/migration"
+require "cassandra_record/railtie" if defined?(Rails)
 
 module CassandraRecord
   class RecordInvalid < StandardError; end
