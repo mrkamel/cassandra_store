@@ -118,6 +118,9 @@ have to assign them. You can pass a timestamp to `generate_timeuuid` as well:
 This is desirable when you have timestamp columns as well and you want them
 to match with your timeuuid key.
 
+Similarly, when using `UUID` instead of `TIMEUUID` you have to use
+`generate_uuid` instead.
+
 In addition, you can of course use all kinds of validations, hooks, etc.
 
 ## Querying
