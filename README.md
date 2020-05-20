@@ -109,7 +109,12 @@ The `id` is assigned here:
 ```
 
 Please note, CassandraRecord never auto-assigns any values for you, but you
-have to assign them. You can pass a timestamp to `generate_timeuuid` as well.
+have to assign them. You can pass a timestamp to `generate_timeuuid` as well:
+
+```ruby
+  generate_timeuuid(Time.now)
+```
+
 This is desirable when you have timestamp columns as well and you want them
 to match with your timeuuid key.
 
