@@ -43,7 +43,7 @@ keyspaces for you.
 If you are on rails and you don't have any tables yet, you can add migrations
 now. There is no generator yet, so you have to create them manually:
 
-```
+```ruby
 # cassandra/migrate/1589896040_create_posts.rb
 
 class CreatePosts < CassandraRecord::Migration
