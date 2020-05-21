@@ -61,7 +61,7 @@ RSpec.describe CassandraRecord::Base do
 
   describe ".quote_value" do
     it "converts timestamps" do
-      expect(described_class.quote_value(Time.parse("2020-05-21 12:00:00"))).to eq("1590055200000")
+      expect(described_class.quote_value(Time.parse("2020-05-21 12:00:00").utc.round)).to eq("1590055200000")
     end
 
     it "quotes datetimes" do
