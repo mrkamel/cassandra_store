@@ -3,6 +3,8 @@ class CassandraRecord::Base
   include ActiveModel::Validations
   include Hooks
 
+  class_attribute :keyspace_settings
+  class_attribute :cluster_pool
   class_attribute :connection_pool
 
   class_attribute :logger
@@ -17,6 +19,38 @@ class CassandraRecord::Base
   define_hooks :before_update, :after_update
   define_hooks :before_save, :after_save
   define_hooks :before_destroy, :after_destroy
+
+  def self.configure(hosts: ["127.0.0.1"], keyspace:, cluster_settings: {}, replication: {}, durable_writes: true, pool: { size: 5, timeout: 5 })
+    self.keyspace_settings = { name: keyspace, replication: replication, durable_writes: durable_writes }
+
+    self.cluster_pool = ConnectionPool.new(pool) do
+      Cassandra.cluster(cluster_settings.merge(hosts: hosts)).connect
+    end
+
+    self.connection_pool = ConnectionPool.new(pool) do
+      Cassandra.cluster(cluster_settings.merge(hosts: hosts)).connect(keyspace)
+    end
+  end
+
+  def self.drop_keyspace(name: keyspace_settings[:name], if_exists: false)
+    CassandraRecord::Base.cluster_pool.with do |cluster_connection|
+      cluster_connection.execute("DROP KEYSPACE #{if_exists ? "IF EXISTS" : ""} #{quote_keyspace_name(name)}")
+    end
+  end
+
+  def self.create_keyspace(name: keyspace_settings[:name], replication: keyspace_settings[:replication], durable_writes: keyspace_settings[:durable_writes], if_not_exists: false)
+    cql = <<~CQL
+      CREATE KEYSPACE #{if_not_exists ? "IF NOT EXISTS" : ""} #{quote_keyspace_name(name)}
+        WITH REPLICATION = {
+          #{replication.map { |key, value| "#{quote_value(key)}: #{quote_value(value)}" }.join(", ")}
+        }
+        AND DURABLE_WRITES = #{quote_value(durable_writes)}
+    CQL
+
+    CassandraRecord::Base.cluster_pool.with do |cluster_connection|
+      cluster_connection.execute(cql)
+    end
+  end
 
   def initialize(attributes = {})
     @persisted = false
@@ -234,12 +268,18 @@ class CassandraRecord::Base
     end
   end
 
+  def self.quote_keyspace_name(keyspace_name)
+    quote_column_name(keyspace_name)
+  end
+
   def self.quote_table_name(table_name)
     quote_column_name(table_name)
   end
 
   def self.quote_column_name(column_name)
-    "\"#{column_name.to_s.gsub(/\"/, "")}\""
+    raise(ArgumentError, "Invalid column name #{column_name}") if column_name.to_s.include?("\"")
+
+    "\"#{column_name}\""
   end
 
   def self.quote_value(value)

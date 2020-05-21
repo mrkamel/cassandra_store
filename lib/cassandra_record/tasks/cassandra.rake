@@ -1,4 +1,16 @@
 namespace :cassandra do
+  namespace :keyspace do
+    task drop: :environment do
+      CassandraRecord::Base.logger.level = Logger::DEBUG
+      CassandraRecord::Base.drop_keyspace(if_exists: true)
+    end
+
+    task create: :environment do
+      CassandraRecord::Base.logger.level = Logger::DEBUG
+      CassandraRecord::Base.create_keyspace(if_not_exists: true)
+    end
+  end
+
   namespace :migrate do
     desc "Run a specific up-migration"
     task up: :environment do

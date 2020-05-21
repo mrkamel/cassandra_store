@@ -29,14 +29,31 @@ Or install it yourself as:
 First and foremost, you need to connect to your cassandra cluster like so:
 
 ```ruby
-CassandraRecord::Base.connection_pool = ConnectionPool.new(size: 5, timeout: 5) do
-  Cassandra.cluster(consistency: :quorum, hosts: ["127.0.0.1"]).connect("my_keyspace")
-end
+CassandraRecord::Base.configure(
+  hosts: ["127.0.0.1"],
+  keyspace: "my_keyspace",
+  cluster_settings: { consistency: :quorum }
+)
 ```
 
-When using rails, you want to do that in an initializer. Please note, we
-assume, you already have a keyspace. CassandraRecord can not yet create
-keyspaces for you.
+When using rails, you want to do that in an initializer. If you do not yet have
+a keyspace, you additionally want to pass `replication` settings:
+
+```ruby
+CassandraRecord::Base.configure(
+  hosts: ["127.0.0.1"],
+  keyspace: "my_keyspace",
+  cluster_settings: { consistency: :quorum },
+  replication: { class: 'SimpleStrategy', replication_factor: 1 }
+)
+```
+
+Afterwards, you can create/drop the specified keyspace:
+
+```ruby
+rake cassandra:keyspace:create
+rake cassandra:keyspace:drop
+```
 
 ## Migrations
 

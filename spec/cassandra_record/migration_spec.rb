@@ -39,7 +39,7 @@ RSpec.describe CassandraRecord::Migration do
     it "delegates to CassandraRecord::Base.execute" do
       allow(CassandraRecord::Base).to receive(:execute)
 
-      CassandraRecord::Migration.new.execute("args")
+      described_class.new.execute("args")
 
       expect(CassandraRecord::Base).to have_received(:execute).with("args")
     end
@@ -55,7 +55,7 @@ RSpec.describe CassandraRecord::Migration do
       allow(described_class.migration_class(path, "1589957812")).to receive(:new).and_return(migration1)
       allow(described_class.migration_class(path, "1589957813")).to receive(:new).and_return(migration2)
 
-      CassandraRecord::Migration.migrate(path)
+      described_class.migrate(path)
 
       expect(migration1).to have_received(:up)
       expect(migration2).to have_received(:up)
@@ -70,7 +70,7 @@ RSpec.describe CassandraRecord::Migration do
       allow(described_class.migration_class(path, "1589957812")).to receive(:new).and_return(migration1)
       allow(described_class.migration_class(path, "1589957813")).to receive(:new).and_return(migration2)
 
-      CassandraRecord::Migration.migrate(path)
+      described_class.migrate(path)
 
       expect(migration1).not_to have_received(:up)
       expect(migration2).to have_received(:up)

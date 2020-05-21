@@ -21,6 +21,78 @@ RSpec.describe CassandraRecord::Base do
     end
   end
 
+  describe ".drop_keyspace" do
+    # Already tested
+  end
+
+  describe ".create_keyspace" do
+    # Already tested
+  end
+
+  describe ".quote_keyspace_name" do
+    it "delegates to quote_column_name" do
+      allow(described_class).to receive(:quote_column_name)
+
+      described_class.quote_keyspace_name("keyspace_name")
+
+      expect(described_class).to have_received(:quote_column_name).with("keyspace_name")
+    end
+  end
+
+  describe ".quote_table_name" do
+    it "delegates to quote_column_name" do
+      allow(described_class).to receive(:quote_column_name)
+
+      described_class.quote_table_name("table_name")
+
+      expect(described_class).to have_received(:quote_column_name).with("table_name")
+    end
+  end
+
+  describe ".quote_column_name" do
+    it "quotes the value" do
+      expect(described_class.quote_column_name("column_name")).to eq("\"column_name\"")
+    end
+
+    it "raises an ArgumentError if the value includes quotes" do
+      expect { described_class.quote_column_name("column\"name") }.to raise_error(ArgumentError)
+    end
+  end
+
+  describe ".quote_value" do
+    it "converts timestamps" do
+      expect(described_class.quote_value(Time.parse("2020-05-21 12:00:00"))).to eq("1590055200000")
+    end
+
+    it "quotes datetimes" do
+      expect(described_class.quote_value(DateTime.new(2020, 5, 21, 12, 0, 0))).to eq("1590062400000")
+    end
+
+    it "quotes dates" do
+      expect(described_class.quote_value(Date.new(2020, 5, 21))).to eq("'2020-05-21'")
+    end
+
+    it "does not quote numerics" do
+      expect(described_class.quote_value(19)).to eq("19")
+      expect(described_class.quote_value(19.5)).to eq("19.5")
+    end
+
+    it "does not quote booleans" do
+      expect(described_class.quote_value(true)).to eq("true")
+      expect(described_class.quote_value(false)).to eq("false")
+    end
+
+    it "does not quote cassandra uuids" do
+      expect(described_class.quote_value(Cassandra::Uuid.new("50554d6e-29bb-11e5-b345-feff819cdc9f"))).to eq("50554d6e-29bb-11e5-b345-feff819cdc9f")
+      expect(described_class.quote_value(Cassandra::TimeUuid.new("e3341564-9b5f-11ea-8fa9-315018f39af9"))).to eq("e3341564-9b5f-11ea-8fa9-315018f39af9")
+    end
+
+    it "quotes strings" do
+      expect(described_class.quote_value("some value")).to eq("'some value'")
+      expect(described_class.quote_value("some'value")).to eq("'some''value'")
+    end
+  end
+
   describe "#assign" do
     it "assigns the specified attributes" do
       test_log = TestLog.new

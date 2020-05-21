@@ -1,12 +1,12 @@
 require "cassandra_record"
 
-connection = Cassandra.cluster.connect
-connection.execute "DROP KEYSPACE IF EXISTS cassandra_record"
-connection.execute "CREATE KEYSPACE cassandra_record WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }"
+CassandraRecord::Base.configure(
+  keyspace: "cassandra_record",
+  replication: { class: "SimpleStrategy", replication_factor: 1 }
+)
 
-CassandraRecord::Base.connection_pool = ConnectionPool.new(size: 1, timeout: 5) do
-  Cassandra.cluster.connect("cassandra_record")
-end
+CassandraRecord::Base.drop_keyspace(if_exists: true)
+CassandraRecord::Base.create_keyspace
 
 CassandraRecord::Base.execute <<CQL
   CREATE TABLE posts(

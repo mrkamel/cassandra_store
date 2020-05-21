@@ -5,6 +5,9 @@ Naming/FileName:
   Exclude:
     - lib/cassandra-record.rb
 
+Metrics/ParameterLists:
+  Enabled: false
+
 Style/DoubleNegation:
   Enabled: false
 
