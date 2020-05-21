@@ -484,6 +484,21 @@ RSpec.describe CassandraRecord::Base do
     end
   end
 
+  describe ".cluster_execute" do
+    it "raises when a table is accessed without keyspace" do
+      expect { CassandraRecord::Base.cluster_execute("SELECT * FROM test_logs") }.to raise_error(/No keyspace has been specified/)
+    end
+
+    it "executes the statement and returns the result" do
+      records = [
+        TestLog.create!(timestamp: Time.parse("2016-11-01 12:00:00")),
+        TestLog.create!(timestamp: Time.parse("2016-11-02 12:00:00"))
+      ]
+
+      expect(CassandraRecord::Base.execute("SELECT * FROM cassandra_record.test_logs", consistency: :all).map { |row| row["id"] }.to_set).to eq(records.map(&:id).to_set)
+    end
+  end
+
   describe ".execute" do
     it "executes the statement and returns the result" do
       records = [

@@ -33,9 +33,7 @@ class CassandraRecord::Base
   end
 
   def self.drop_keyspace(name: keyspace_settings[:name], if_exists: false)
-    CassandraRecord::Base.cluster_pool.with do |cluster_connection|
-      cluster_connection.execute("DROP KEYSPACE #{if_exists ? "IF EXISTS" : ""} #{quote_keyspace_name(name)}")
-    end
+    cluster_execute("DROP KEYSPACE #{if_exists ? "IF EXISTS" : ""} #{quote_keyspace_name(name)}")
   end
 
   def self.create_keyspace(name: keyspace_settings[:name], replication: keyspace_settings[:replication], durable_writes: keyspace_settings[:durable_writes], if_not_exists: false)
@@ -47,9 +45,7 @@ class CassandraRecord::Base
         AND DURABLE_WRITES = #{quote_value(durable_writes)}
     CQL
 
-    CassandraRecord::Base.cluster_pool.with do |cluster_connection|
-      cluster_connection.execute(cql)
-    end
+    cluster_execute(cql)
   end
 
   def initialize(attributes = {})
@@ -303,6 +299,14 @@ class CassandraRecord::Base
 
   def self.truncate_table
     execute "TRUNCATE TABLE #{quote_table_name table_name}"
+  end
+
+  def self.cluster_execute(statement, options = {})
+    logger.debug(statement)
+
+    cluster_pool.with do |connection|
+      connection.execute(statement, options)
+    end
   end
 
   def self.execute(statement, options = {})
