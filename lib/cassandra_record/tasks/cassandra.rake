@@ -1,10 +1,12 @@
 namespace :cassandra do
   namespace :keyspace do
+    desc "Drop the keyspace"
     task drop: :environment do
       CassandraRecord::Base.logger.level = Logger::DEBUG
       CassandraRecord::Base.drop_keyspace(if_exists: true)
     end
 
+    desc "Create the keyspace"
     task create: :environment do
       CassandraRecord::Base.logger.level = Logger::DEBUG
       CassandraRecord::Base.create_keyspace(if_not_exists: true)

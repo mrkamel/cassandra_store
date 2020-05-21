@@ -65,7 +65,7 @@ now. There is no generator yet, so you have to create them manually:
 
 class CreatePosts < CassandraRecord::Migration
   def up
-    execute <<-EOF
+    execute <<-CQL
       CREATE TABLE posts (
         user TEXT,
         domain TEXT,
@@ -73,7 +73,7 @@ class CreatePosts < CassandraRecord::Migration
         message TEXT,
         PRIMARY KEY ((user, domain), id)
       )
-    EOF
+    CQL
   end
 
   def down
