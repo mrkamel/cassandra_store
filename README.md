@@ -1,4 +1,4 @@
-[![Build Status](https://secure.travis-ci.org/mrkamel/cassandra-store.png?branch=master)](http://travis-ci.org/mrkamel/cassandra-store)
+[![Build Status](https://secure.travis-ci.org/mrkamel/cassandra_store.png?branch=master)](http://travis-ci.org/mrkamel/cassandra_store)
 
 # CassandraStore
 
@@ -12,7 +12,7 @@ complexity of the code base.
 
 Add this line to your application's Gemfile:
 
-    gem 'cassandra-store'
+    gem 'cassandra_store'
 
 And then execute:
 
@@ -20,7 +20,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install cassandra-store
+    $ gem install cassandra_store
 
 # Usage
 
