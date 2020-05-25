@@ -77,7 +77,7 @@ class CreatePosts < CassandraRecord::Migration
   end
 
   def down
-    execute 'DROP TABLE posts'
+    execute "DROP TABLE posts"
   end
 end
 ```
