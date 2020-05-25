@@ -1,9 +1,9 @@
-[![Build Status](https://secure.travis-ci.org/mrkamel/cassandra-record.png?branch=master)](http://travis-ci.org/mrkamel/cassandra-record)
+[![Build Status](https://secure.travis-ci.org/mrkamel/cassandra-store.png?branch=master)](http://travis-ci.org/mrkamel/cassandra-store)
 
-# CassandraRecord
+# CassandraStore
 
-CassandraRecord is a fun to use ORM for Cassandra with a chainable,
-ActiveRecord like DSL for querying, inserting, updating and deleting records
+CassandraStore is a fun to use ORM for Cassandra with a chainable,
+ActiveStore like DSL for querying, inserting, updating and deleting records
 plus built-in migration support. It is built on-top of the cassandra-driver
 gem, using its built-in automated paging what is drastically reducing the
 complexity of the code base.
@@ -12,7 +12,7 @@ complexity of the code base.
 
 Add this line to your application's Gemfile:
 
-    gem 'cassandra-record'
+    gem 'cassandra-store'
 
 And then execute:
 
@@ -20,7 +20,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install cassandra-record
+    $ gem install cassandra-store
 
 # Usage
 
@@ -29,7 +29,7 @@ Or install it yourself as:
 First and foremost, you need to connect to your cassandra cluster like so:
 
 ```ruby
-CassandraRecord::Base.configure(
+CassandraStore::Base.configure(
   hosts: ["127.0.0.1"],
   keyspace: "my_keyspace",
   cluster_settings: { consistency: :quorum }
@@ -40,7 +40,7 @@ When using rails, you want to do that in an initializer. If you do not yet have
 a keyspace, you additionally want to pass `replication` settings:
 
 ```ruby
-CassandraRecord::Base.configure(
+CassandraStore::Base.configure(
   hosts: ["127.0.0.1"],
   keyspace: "my_keyspace",
   cluster_settings: { consistency: :quorum },
@@ -63,7 +63,7 @@ now. There is no generator yet, so you have to create them manually:
 ```ruby
 # cassandra/migrate/1589896040_create_posts.rb
 
-class CreatePosts < CassandraRecord::Migration
+class CreatePosts < CassandraStore::Migration
   def up
     execute <<-CQL
       CREATE TABLE posts (
@@ -89,7 +89,7 @@ Afterwards, simply run `rake cassandra:migrate`.
 Creating models couldn't be easier:
 
 ```ruby
-class Post < CassandraRecord::Base
+class Post < CassandraStore::Base
   column :user, :text, partition_key: true
   column :domain, :text, partition_key: true
   column :id, :timeuuid, clustering_key: true
@@ -110,7 +110,7 @@ Let's check this out in detail:
   column :domain, :text, partition_key: true
 ```
 
-tells CassandraRecord that your partition key is comprised of the `user` column
+tells CassandraStore that your partition key is comprised of the `user` column
 as well as the `domain` column. For more information regarding partition keys
 and the data model of cassandra, please check out the cassandra docs. Afterwards,
 the clustering/sorting key is specified via:
@@ -125,7 +125,7 @@ The `id` is assigned here:
   self.id ||= generate_timeuuid
 ```
 
-Please note, CassandraRecord never auto-assigns any values for you, but you
+Please note, CassandraStore never auto-assigns any values for you, but you
 have to assign them. You can pass a timestamp to `generate_timeuuid` as well:
 
 ```ruby
@@ -154,7 +154,7 @@ Post.first.delete
 Post.first.destroy
 ```
 
-CassandraRecord supports comprehensive query methods in a chainable way:
+CassandraStore supports comprehensive query methods in a chainable way:
 
 * `all`
 
@@ -270,7 +270,7 @@ is to remove all records from the table.
 
 ## Semantic Versioning
 
-CassandraRecord is using Semantic Versioning: [SemVer](http://semver.org/)
+CassandraStore is using Semantic Versioning: [SemVer](http://semver.org/)
 
 ## Contributing
 

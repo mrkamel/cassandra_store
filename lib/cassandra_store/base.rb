@@ -1,4 +1,4 @@
-class CassandraRecord::Base
+class CassandraStore::Base
   include ActiveModel::Dirty
   include ActiveModel::Validations
   include Hooks
@@ -126,7 +126,7 @@ class CassandraRecord::Base
   end
 
   def validate!(context = nil)
-    valid?(context) || raise(CassandraRecord::RecordInvalid, errors.to_a.join(", "))
+    valid?(context) || raise(CassandraStore::RecordInvalid, errors.to_a.join(", "))
   end
 
   def persisted?
@@ -162,7 +162,7 @@ class CassandraRecord::Base
   end
 
   def destroy
-    raise CassandraRecord::RecordNotPersisted unless persisted?
+    raise CassandraStore::RecordNotPersisted unless persisted?
 
     run_hook :before_destroy
 
@@ -176,7 +176,7 @@ class CassandraRecord::Base
   end
 
   def delete
-    raise CassandraRecord::RecordNotPersisted unless persisted?
+    raise CassandraStore::RecordNotPersisted unless persisted?
 
     self.class.execute(delete_record_statement)
 
@@ -218,7 +218,7 @@ class CassandraRecord::Base
   end
 
   def self.relation
-    CassandraRecord::Relation.new(target: self)
+    CassandraStore::Relation.new(target: self)
   end
 
   class << self
@@ -260,7 +260,7 @@ class CassandraRecord::Base
 
       raise ArgumentError, "Can't cast '#{value}' to #{type}"
     else
-      raise CassandraRecord::UnknownType, "Unknown type #{type}"
+      raise CassandraStore::UnknownType, "Unknown type #{type}"
     end
   end
 

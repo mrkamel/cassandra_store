@@ -1,12 +1,12 @@
 require File.expand_path("../spec_helper", __dir__)
 
-RSpec.describe CassandraRecord::Migration do
+RSpec.describe CassandraStore::Migration do
   let(:path) { File.expand_path("../fixtures", __dir__) }
 
   describe ".up" do
     let(:version) { "1589957812" }
 
-    before { CassandraRecord::SchemaMigration.create_table(if_not_exists: true) }
+    before { CassandraStore::SchemaMigration.create_table(if_not_exists: true) }
 
     it "calls the up migration" do
       migration = double(up: true)
@@ -22,7 +22,7 @@ RSpec.describe CassandraRecord::Migration do
   describe ".down" do
     let(:version) { "1589957812" }
 
-    before { CassandraRecord::SchemaMigration.create_table(if_not_exists: true) }
+    before { CassandraStore::SchemaMigration.create_table(if_not_exists: true) }
 
     it "calls the down migration" do
       migration = double(down: true)
@@ -36,17 +36,17 @@ RSpec.describe CassandraRecord::Migration do
   end
 
   describe ".execute" do
-    it "delegates to CassandraRecord::Base.execute" do
-      allow(CassandraRecord::Base).to receive(:execute)
+    it "delegates to CassandraStore::Base.execute" do
+      allow(CassandraStore::Base).to receive(:execute)
 
       described_class.new.execute("args")
 
-      expect(CassandraRecord::Base).to have_received(:execute).with("args")
+      expect(CassandraStore::Base).to have_received(:execute).with("args")
     end
   end
 
   describe ".migrate" do
-    before { CassandraRecord::SchemaMigration.create_table(if_not_exists: true) }
+    before { CassandraStore::SchemaMigration.create_table(if_not_exists: true) }
 
     it "runs all pending migrations" do
       migration1 = double(up: true)

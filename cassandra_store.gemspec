@@ -1,15 +1,15 @@
 lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "cassandra_record/version"
+require "cassandra_store/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "cassandra-record"
-  spec.version       = CassandraRecord::VERSION
+  spec.name          = "cassandra_store"
+  spec.version       = CassandraStore::VERSION
   spec.authors       = ["Benjamin Vetter"]
   spec.email         = ["vetter@flakks.com"]
   spec.description   = %q{Powerful ORM for Cassandra}
   spec.summary       = %q{Easy to use ActiveRecord like ORM for Cassandra}
-  spec.homepage      = "https://github.com/mrkamel/cassandra-record"
+  spec.homepage      = "https://github.com/mrkamel/cassandra_store"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)

@@ -1,6 +1,6 @@
 require File.expand_path("../spec_helper", __dir__)
 
-RSpec.describe CassandraRecord::SchemaMigration do
+RSpec.describe CassandraStore::SchemaMigration do
   describe ".create_table" do
     it "creates the schema migration table" do
       expect { described_class.create(version: Time.now.to_i) }.to raise_error(Cassandra::Errors::InvalidError)

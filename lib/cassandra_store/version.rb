@@ -1,3 +1,3 @@
-module CassandraRecord
+module CassandraStore
   VERSION = "0.0.1"
 end

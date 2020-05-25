@@ -1,14 +1,14 @@
-require "cassandra_record"
+require "cassandra_store"
 
-CassandraRecord::Base.configure(
-  keyspace: "cassandra_record",
+CassandraStore::Base.configure(
+  keyspace: "cassandra_store",
   replication: { class: "SimpleStrategy", replication_factor: 1 }
 )
 
-CassandraRecord::Base.drop_keyspace(if_exists: true)
-CassandraRecord::Base.create_keyspace
+CassandraStore::Base.drop_keyspace(if_exists: true)
+CassandraStore::Base.create_keyspace
 
-CassandraRecord::Base.execute <<CQL
+CassandraStore::Base.execute <<CQL
   CREATE TABLE posts(
     user TEXT,
     domain TEXT,
@@ -19,7 +19,7 @@ CassandraRecord::Base.execute <<CQL
   )
 CQL
 
-class Post < CassandraRecord::Base
+class Post < CassandraStore::Base
   column :user, :text, partition_key: true
   column :domain, :text, partition_key: true
   column :id, :timeuuid, clustering_key: true
@@ -32,7 +32,7 @@ class Post < CassandraRecord::Base
   end
 end
 
-CassandraRecord::Base.execute <<CQL
+CassandraStore::Base.execute <<CQL
   CREATE TABLE test_logs(
     date DATE,
     bucket INT,
@@ -44,7 +44,7 @@ CassandraRecord::Base.execute <<CQL
   )
 CQL
 
-class TestLog < CassandraRecord::Base
+class TestLog < CassandraStore::Base
   column :date, :date, partition_key: true
   column :bucket, :int, partition_key: true
   column :id, :timeuuid, clustering_key: true
@@ -77,7 +77,7 @@ end
 
 RSpec.configure do |config|
   config.before do
-    CassandraRecord::Base.execute <<~CQL
+    CassandraStore::Base.execute <<~CQL
       DROP TABLE IF EXISTS schema_migrations
     CQL
 

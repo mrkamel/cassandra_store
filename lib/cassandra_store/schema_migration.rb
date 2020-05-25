@@ -1,4 +1,4 @@
-class CassandraRecord::SchemaMigration < CassandraRecord::Base
+class CassandraStore::SchemaMigration < CassandraStore::Base
   def self.table_name
     "schema_migrations"
   end

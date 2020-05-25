@@ -3,7 +3,7 @@
     environment:
       - MAX_HEAP_SIZE=512m
       - HEAP_NEWSIZE=128m
-      - KEYSPACES=cassandra_record
+      - KEYSPACES=cassandra_store
     ports:
       - 127.0.0.1:9042:9042
 

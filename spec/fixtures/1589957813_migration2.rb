@@ -1,4 +1,4 @@
-class Migration2 < CassandraRecord::Migration
+class Migration2 < CassandraStore::Migration
   def up; end
 
   def down; end

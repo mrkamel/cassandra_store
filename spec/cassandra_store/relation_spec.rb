@@ -1,6 +1,6 @@
 require File.expand_path("../spec_helper", __dir__)
 
-RSpec.describe CassandraRecord::Relation do
+RSpec.describe CassandraStore::Relation do
   describe "#all" do
     it "returns all records" do
       post1 = Post.create!(user: "user", domain: "domain", message: "message1")

@@ -1,1 +1,0 @@
-require "cassandra_record"

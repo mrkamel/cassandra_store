@@ -1,4 +1,4 @@
-class CassandraRecord::Migration
+class CassandraStore::Migration
   def self.migration_file(path, version)
     Dir[File.join(path, "#{version}_*.rb")].first
   end
@@ -12,17 +12,17 @@ class CassandraRecord::Migration
   def self.up(path, version)
     migration_class(path, version).new.up
 
-    CassandraRecord::SchemaMigration.create!(version: version.to_s)
+    CassandraStore::SchemaMigration.create!(version: version.to_s)
   end
 
   def self.down(path, version)
     migration_class(path, version).new.down
 
-    CassandraRecord::SchemaMigration.where(version: version.to_s).delete_all
+    CassandraStore::SchemaMigration.where(version: version.to_s).delete_all
   end
 
   def self.migrate(path)
-    migrated = CassandraRecord::SchemaMigration.all.to_a.map(&:version).to_set
+    migrated = CassandraStore::SchemaMigration.all.to_a.map(&:version).to_set
     all = Dir[File.join(path, "*.rb")].map { |file| File.basename(file) }
     todo = all.select { |file| file =~ /\A[0-9]+_/ && !migrated.include?(file.to_i.to_s) }.sort_by(&:to_i)
 
@@ -32,7 +32,7 @@ class CassandraRecord::Migration
   end
 
   def execute(*args)
-    CassandraRecord::Base.execute(*args)
+    CassandraStore::Base.execute(*args)
   end
 
   def up; end

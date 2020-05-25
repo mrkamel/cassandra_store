@@ -1,6 +1,6 @@
 require File.expand_path("../spec_helper", __dir__)
 
-class TestRecord < CassandraRecord::Base
+class TestRecord < CassandraStore::Base
   column :text, :text
   column :boolean, :boolean
   column :int, :int
@@ -11,7 +11,7 @@ class TestRecord < CassandraRecord::Base
   column :uuid, :uuid
 end
 
-RSpec.describe CassandraRecord::Base do
+RSpec.describe CassandraStore::Base do
   describe ".new" do
     it "assigns the specified attributes" do
       test_log = TestLog.new(timestamp: "2016-11-01 12:00:00", username: "username")
@@ -231,7 +231,7 @@ RSpec.describe CassandraRecord::Base do
     it "raises an error if validation fails" do
       test_log = TestLog.new
 
-      expect { test_log.save! }.to raise_error(CassandraRecord::RecordInvalid)
+      expect { test_log.save! }.to raise_error(CassandraStore::RecordInvalid)
     end
 
     it "does not persist the record if validation fails" do
@@ -486,7 +486,7 @@ RSpec.describe CassandraRecord::Base do
 
   describe ".cluster_execute" do
     it "raises when a table is accessed without keyspace" do
-      expect { CassandraRecord::Base.cluster_execute("SELECT * FROM test_logs") }.to raise_error(/No keyspace has been specified/)
+      expect { CassandraStore::Base.cluster_execute("SELECT * FROM test_logs") }.to raise_error(/No keyspace has been specified/)
     end
 
     it "executes the statement and returns the result" do
@@ -495,7 +495,7 @@ RSpec.describe CassandraRecord::Base do
         TestLog.create!(timestamp: Time.parse("2016-11-02 12:00:00"))
       ]
 
-      expect(CassandraRecord::Base.execute("SELECT * FROM cassandra_record.test_logs", consistency: :all).map { |row| row["id"] }.to_set).to eq(records.map(&:id).to_set)
+      expect(CassandraStore::Base.execute("SELECT * FROM cassandra_store.test_logs", consistency: :all).map { |row| row["id"] }.to_set).to eq(records.map(&:id).to_set)
     end
   end
 
@@ -578,10 +578,10 @@ RSpec.describe CassandraRecord::Base do
   end
 
   describe "#validate!" do
-    it "raises CassandraRecord::RecordInvalid if validation fails" do
+    it "raises CassandraStore::RecordInvalid if validation fails" do
       TestLog.new(timestamp: Time.now).validate!
 
-      expect { TestLog.new.validate! }.to raise_error(CassandraRecord::RecordInvalid)
+      expect { TestLog.new.validate! }.to raise_error(CassandraStore::RecordInvalid)
     end
   end
 
