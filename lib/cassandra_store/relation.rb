@@ -69,12 +69,12 @@ class CassandraStore::Relation
     end
   end
 
-  def find_each(options = {})
-    return enum_for(:find_each, options) unless block_given?
+  def find_each(**kwargs)
+    return enum_for(:find_each, **kwargs) unless block_given?
 
-    find_in_batches options do |batch|
+    find_in_batches(**kwargs) do |batch|
       batch.each do |record|
-        yield record
+        yield(record)
       end
     end
   end
