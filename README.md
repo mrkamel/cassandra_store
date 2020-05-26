@@ -2,11 +2,11 @@
 
 # CassandraStore
 
-CassandraStore is a fun to use ORM for Cassandra with a chainable,
-ActiveStore like DSL for querying, inserting, updating and deleting records
-plus built-in migration support. It is built on-top of the cassandra-driver
-gem, using its built-in automated paging what is drastically reducing the
-complexity of the code base.
+CassandraStore is a fun to use ORM for Cassandra with a chainable, ActiveRecord
+like DSL for querying, inserting, updating and deleting records plus built-in
+migration and keyspace management support. It is built on-top of the
+cassandra-driver gem, using its built-in automated paging what is drastically
+reducing the complexity of the code base.
 
 ## Install
 
